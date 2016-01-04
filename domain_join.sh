@@ -1,18 +1,24 @@
 #!/bin/bash
 
-# THIS SHOULD BE SET FOR YOUR LOCAL TZ
+# 1. THIS SHOULD BE SET FOR YOUR LOCAL TZ
 TIMEZONE="America/Chicago"
 
-# ADD A GROUP HERE IF YOU WANT ONE ADDED TO SUDOERS. WORKS FOR $AD GROUPS.
-# LEAVE EMPTY IF NOT IN USE
+# 2. ADD A GROUP HERE IF YOU WANT ONE ADDED TO SUDOERS. WORKS FOR $AD GROUPS.
+# LEAVE EMPTY ("") IF NOT IN USE
 SUDOGROUP="SUDOers"
+# note: I really recommend you set this so that an elevated domain user can 
+#  administrate these remotely. The alternatives are (a) local users, whose
+#  passwords can't be changed easily, or (b) SSH keys for every user, which
+#  is a pita and not always practical for large organizations.
 
-# PUT YES/yes HERE IF YOU WANT ANSIBLE, ANYTHING ELSE IF NOT
+# 3. PUT YES/yes HERE IF YOU WANT ANSIBLE, ANYTHING ELSE IF NOT
 ANSIBLE="YES"
 
 
 
 # Script starts here
+
+# You need to be root, sorry.
 if [[ $EUID -ne 0 ]]; then
 	echo "This script requires elevated privileges to run. Are you root?"
 	exit
@@ -22,13 +28,15 @@ HOSTNAME=$(hostname)
 
 echo 'FQDN of DC ("realm.domain.tld"):'
 read FQDN
-echo 'Username with domain add authority:'
+echo 'Username with domain machine add authority:'
 read USERNAME
 echo 'Password:'
 read -s PASSWORD
 
+# Read in the date for backup tagging
 DATE=$(date +"%Y%m%d%H%M")
 
+# Parse fqdn
 REALM_U=$(echo $FQDN | awk 'BEGIN {FS="."}{print toupper($1)}')
 DOMAIN_U=$(echo $FQDN | awk 'BEGIN {FS="."}{print toupper($2)}')
 TLD_U=$(echo $FQDN | awk 'BEGIN {FS="."}{print toupper($3)}')
@@ -44,18 +52,18 @@ apt-get update &>/dev/null
 DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &>/dev/null
 
 echo "Installing new packages..."
+# noninteractive suppresses blue screens for kerberos
 DEBIAN_FRONTEND=noninteractive apt-get install winbind samba \
 libnss-winbind libpam-winbind krb5-config krb5-locales python-apt \
 krb5-user sudo ntp -y -q &>/dev/null || ( echo "Failed to install some packages. Quitting." && exit 1 )
 
 echo "Backing up kerberos config..."
-touch /etc/krb5.conf
-mv /etc/krb5.conf /etc/krb5.conf.backup$DATE
-
-FILE1="/etc/krb5.conf"
+FILE="/etc/krb5.conf"
+touch $FILE
+mv $FILE $FILE.backup$DATE
 
 echo "Writing new kerberos config..."
-/bin/cat <<EOT >> $FILE1
+/bin/cat <<EOT >> $FILE
 
 [libdefaults]
  ticket_lifetime = 24000
@@ -94,12 +102,12 @@ echo "Writing new kerberos config..."
 EOT
 
 echo "Backing up smb.conf..."
-touch /etc/samba/smb.conf
-mv /etc/samba/smb.conf /etc/samba/smb.conf.backup$DATE
-FILE2="/etc/samba/smb.conf"
+FILE="/etc/samba/smb.conf"
+touch $FILE
+mv $FILE $FILE.backup$DATE
 
 echo "Writing new Samba config..."
-/bin/cat <<EOT >> $FILE2
+/bin/cat <<EOT >> $FILE
 
 [global]
         security = ads
@@ -169,12 +177,12 @@ echo "Writing new Samba config..."
 EOT
 
 echo "Backing up nsswitch.conf..."
-touch /etc/nsswitch.conf
-mv /etc/nsswitch.conf /etc/nsswitch.conf.backup$DATE
-FILE3="/etc/nsswitch.conf"
+FILE="/etc/nsswitch.conf"
+touch $FILE
+mv $FILE $FILE.backup$DATE
 
 echo "Writing new nsswitch..."
-/bin/cat <<EOT >> $FILE3
+/bin/cat <<EOT >> $FILE
 passwd:         compat winbind
 group:          compat winbind
 shadow:         compat
@@ -193,15 +201,15 @@ EOT
 
 
 echo "Backing up hosts..."
-touch /etc/hosts
-mv /etc/hosts /etc/hosts.backup$DATE
-FILE4="/etc/hosts"
+FILE="/etc/hosts"
+touch $FILE
+mv $FILE $FILE.backup$DATE
 
 echo "Writing new nsswitch..."
-/bin/cat <<EOT >> $FILE4
+/bin/cat <<EOT >> $FILE
 
 127.0.0.1    localhost
-127.0.1.1    $HOSTNAME.$DOMAIN_U.$TLD_U $HOSTNAME
+127.0.1.1    $HOSTNAME.$DOMAIN_L.$TLD_L $HOSTNAME
 
 # The following lines are desirable for IPv6 capable hosts
 ::1     ip6-localhost ip6-loopback
