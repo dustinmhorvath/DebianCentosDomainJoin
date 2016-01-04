@@ -1,6 +1,7 @@
 # DebianDomainJoin
 #### Script for adding any Debian member machine to an Active Directory domain.
 
+- Should work on any Debian-based distribution (including Raspbian).
 - Installs all of the necessary packages to communicate with Kerberos and Active Directory.
 - Backs up Kerberos, Samba, NSSwitch, and hosts, and creates a valid domain configuration for each.
 - Joins the domain using 'net'.
@@ -16,7 +17,7 @@
 
 #### Why use this script?
 
-1. Realmd is cool, but isn't in all standard repositories, and doesn't do a lot more than 'net ads join' does.
-2. A centralized script assures you that all member machines receive the same configuration.
-3. It permits easy expandability of features that you might want to distribute across all members.
-4. Even if you use a tool instead of this, it's nice to know what's going on under the hood.
+- Realmd is cool, but isn't in all standard repositories, and doesn't do a lot more than 'net ads join' does.
+- A centralized script assures you that all member machines receive the same configuration.
+- It permits easy expandability of features that you might want to distribute across all members.
+- Even if you use a tool instead of this, it's nice to know what's going on under the hood.
