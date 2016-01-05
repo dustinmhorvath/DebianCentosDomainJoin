@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # 1. THIS SHOULD BE SET FOR YOUR LOCAL TZ
 TIMEZONE="America/Chicago"
@@ -6,12 +7,13 @@ TIMEZONE="America/Chicago"
 # 2. ADD A GROUP HERE IF YOU WANT ONE ADDED TO SUDOERS. WORKS FOR $AD GROUPS.
 # LEAVE EMPTY ("") IF NOT IN USE
 SUDOGROUP="SUDOers"
-# note: I really recommend you set this so that an elevated domain user can 
+# note: I really recommend you set this so that an elevated domain user can
 #  administrate these remotely. The alternatives are (a) local users, whose
 #  passwords can't be changed easily, or (b) SSH keys for every user, which
-#  is a pita and not always practical for large organizations.
+#  is a pita and not always practical for large organizations. Local sudo
+#  users are trouble.
 
-# 3. PUT YES/yes HERE IF YOU WANT ANSIBLE, ANYTHING ELSE IF NOT
+# 3. PUT YES/yEs HERE IF YOU WANT ANSIBLE, ANYTHING ELSE IF NOT
 ANSIBLE="YES"
 
 
@@ -110,30 +112,30 @@ echo "Writing new Samba config..."
 /bin/cat <<EOT >> $FILE
 
 [global]
-        security = ads
-        realm = $DOMAIN_L.$TLD_L
-        password server = $REALM_L.$DOMAIN_L.$TLD_L
-        workgroup = nichnologist
-        winbind separator = +
-        wins server = $REALM_L.$DOMAIN_L.$TLD_L
-        idmap config *:backend = rid
-        idmap config *:range = 1000-100000
-        winbind nested groups = yes
-        winbind trusted domains only = no
-        winbind enum users = yes
-        winbind enum groups = yes
-	template homedir = /home/%D/%U
-        template shell = /bin/bash
-        client use spnego = yes
-        client ntlmv2 auth = yes
-        encrypt passwords = yes
-        winbind use default domain = yes
-        restrict anonymous = 2
-        domain master = no
-        local master = no
-        preferred master = no
-        os level = 0
-        winbind refresh tickets = yes
+   security = ads
+   realm = $DOMAIN_L.$TLD_L
+   password server = $REALM_L.$DOMAIN_L.$TLD_L
+   workgroup = nichnologist
+   winbind separator = +
+   wins server = $REALM_L.$DOMAIN_L.$TLD_L
+   idmap config *:backend = rid
+   idmap config *:range = 1000-100000
+   winbind nested groups = yes
+   winbind trusted domains only = no
+   winbind enum users = yes
+   winbind enum groups = yes
+   template homedir = /home/%D/%U
+   template shell = /bin/bash
+   client use spnego = yes
+   client ntlmv2 auth = yes
+   encrypt passwords = yes
+   winbind use default domain = yes
+   restrict anonymous = 2
+   domain master = no
+   local master = no
+   preferred master = no
+   os level = 0
+   winbind refresh tickets = yes
 
 [homes]
    comment = Home Directories
@@ -142,13 +144,13 @@ echo "Writing new Samba config..."
    create mask = 0700
    directory mask = 0700
    valid users = %S
-   
+
 [netlogon]
    comment = Network Logon Service
    path = /home/samba/netlogon
    guest ok = yes
    read only = yes
-   
+
 [profiles]
    comment = Users profiles
    path = /home/samba/profiles
@@ -156,7 +158,7 @@ echo "Writing new Samba config..."
    browseable = no
    create mask = 0600
    directory mask = 0700
-   
+
 [printers]
    comment = All Printers
    browseable = no
@@ -165,7 +167,7 @@ echo "Writing new Samba config..."
    guest ok = no
    read only = yes
    create mask = 0700
-   
+
 [print$]
    comment = Printer Drivers
    path = /var/lib/samba/printers
@@ -230,6 +232,7 @@ if net ads join -U $USERNAME%$PASSWORD; then
 	fi
 
 # This gets the time from your DC. If you have a different time server, change it here.
+#  (But if the DC can serve the time, then /shrug. Needed for Kerberos auth.
 echo "Syncing NTP..."
 ntpd -s $REALM_L.$DOMAIN_L.$TLD_L
 
@@ -240,7 +243,8 @@ service cron restart
 
 # Restart winbind and samba. Fails over to unmasked samba for older (pre-systemd/upstart).
 echo "Restarting samba."
-(service winbind restart; service nmbd restart; service smbd restart; service samba-ad-dc restart) || service winbind restart; service samba restart
+(service winbind restart; service nmbd restart; service smbd restart; \
+  service samba-ad-dc restart) || service winbind restart; service samba restart
 
 echo "Refreshing domain users and accounts..."
 if
