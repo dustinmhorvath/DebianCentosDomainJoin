@@ -17,7 +17,9 @@ ANSIBLE="YES"
 
 # 4. OPTION HERE TO RESTRICT SSH LOGINS TO A PARTICULAR GROUP. SHOULD WORK 
 #  FOR LOCAL GROUPS OR AD GROUPS
-SSHGROUPS="users SSHusers"
+SSHGROUPS="users ssh_ad_users"
+# note: case-sensitivity here seems inconsistent, use caution when
+#  naming your groups for SSH.
 
 # Script starts here
 
