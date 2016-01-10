@@ -1,5 +1,4 @@
 #!/bin/bash
-set -e
 
 # 1. THIS SHOULD BE SET FOR YOUR LOCAL TZ
 TIMEZONE="America/Chicago"
@@ -245,8 +244,7 @@ service cron restart
 
 # Restart winbind and samba. Fails over to unmasked samba for older (pre-systemd/upstart).
 echo "Restarting samba."
-(service winbind restart; service nmbd restart; service smbd restart; \
-  service samba-ad-dc restart) || service winbind restart; service samba restart
+service winbind restart; service nmbd restart; service smbd restart; service samba-ad-dc restart || service winbind restart; service samba restart
 
 echo "Refreshing domain users and accounts..."
 if
@@ -275,7 +273,7 @@ if
 
 # Checks to make sure we haven't already added this group to sudoers
 #   to avoid duplicates
-if [ -z "$SUDOGROUPS" ]; then
+if [ -z "$SUDOGROUP" ]; then
 	echo "Skipping sudo group add."
 	else
 		grep -q -F "%$SUDOGROUP   ALL=(ALL:ALL) ALL" /etc/sudoers  || echo "%$SUDOGROUP   ALL=(ALL:ALL) ALL" >> /etc/sudoers
