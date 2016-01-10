@@ -16,7 +16,9 @@ SUDOGROUP="SUDOers"
 # 3. PUT YES/yEs HERE IF YOU WANT ANSIBLE, ANYTHING ELSE IF NOT
 ANSIBLE="YES"
 
-
+# 4. OPTION HERE TO RESTRICT SSH LOGINS TO A PARTICULAR GROUP. SHOULD WORK 
+#  FOR LOCAL GROUPS OR AD GROUPS
+SSHGROUPS="users SSHusers"
 
 # Script starts here
 
@@ -273,11 +275,24 @@ if
 
 # Checks to make sure we haven't already added this group to sudoers
 #   to avoid duplicates
-if [ -z "$SUDOGROUP" ]; then
+if [ -z "$SUDOGROUPS" ]; then
 	echo "Skipping sudo group add."
 	else
 		grep -q -F "%$SUDOGROUP   ALL=(ALL:ALL) ALL" /etc/sudoers  || echo "%$SUDOGROUP   ALL=(ALL:ALL) ALL" >> /etc/sudoers
 	fi
+
+if [ -z "$SSHGROUPS" ]; then
+        echo "Skipping SSH group restriction. No Groups defined."
+        else
+                cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup$DATE
+                if grep -q AllowGroups /etc/ssh/sshd_config; then
+                        sed -i "/^AllowGroups/ s/$/ $SSHGROUPS/" /etc/ssh/sshd_config
+                else
+                        echo "AllowGroups $SSHGROUPS" >> /etc/ssh/sshd_config
+                fi
+		service sshd reload
+        fi
+
 
 # Install ansible in here
 if [ $ANSIBLE="yes" ]; then

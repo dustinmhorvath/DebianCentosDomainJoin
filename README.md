@@ -14,6 +14,7 @@
 1. Set the timezone. Check in /usr/share/zoneinfo/ if you don't know the format.
 2. Set a sudoers group. Or don't, and leave it blank. I'm a readme, not the police.
 3. Mark whether or not you want Ansible installed. It's pretty cool, so I recommend it if you don't have some other management system in place.
+4. Option to restrict which users can SSH into member machines by group.
 
 #### Why use this script?
 
