@@ -290,7 +290,7 @@ if [ -z "$SSHGROUPS" ]; then
                 else
                         echo "AllowGroups $SSHGROUPS" >> /etc/ssh/sshd_config
                 fi
-		service sshd reload
+		service ssh restart
         fi
 
 
