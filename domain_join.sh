@@ -112,8 +112,8 @@ mv $FILE $FILE.backup$DATE
 
 echo "Writing new Samba config..."
 /bin/cat <<EOT >> $FILE
-
 [global]
+
    security = ads
    realm = $DOMAIN_L.$TLD_L
    password server = $REALM_L.$DOMAIN_L.$TLD_L
@@ -123,6 +123,7 @@ echo "Writing new Samba config..."
    idmap config *:backend = rid
    idmap config *:range = 1000-100000
    winbind nested groups = yes
+   winbind allow trusted domains = yes
    winbind trusted domains only = no
    winbind enum users = yes
    winbind enum groups = yes
