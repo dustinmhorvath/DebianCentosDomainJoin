@@ -22,7 +22,7 @@ SSHGROUPS=""
 # Script starts here
 
 # You need to be root, sorry.
-if [[ whoami != "root" ]]; then
+if [[ $EUID -ne 0 ]]; then
 	echo "This script requires elevated privileges to run. Are you root?"
 	exit
 fi
@@ -125,7 +125,6 @@ echo "Writing new Samba config..."
    idmap config *:backend = rid
    idmap config *:range = 1000-100000
    winbind nested groups = yes
-   winbind allow trusted domains = yes
    winbind trusted domains only = no
    winbind enum users = yes
    winbind enum groups = yes
@@ -217,7 +216,7 @@ service cron restart
 
 # Restart winbind and samba. Fails over to unmasked samba for older (pre-systemd/upstart).
 echo "Restarting samba."
-service winbind restart; service nmbd restart; service smbd restart; service samba-ad-dc restart || service winbind restart; service samba restart
+service winbind restart; oddjobd restart; service messagebus restart
 
 echo "Joining domain..."
 if net ads join -U $USERNAME%$PASSWORD; then
@@ -262,6 +261,7 @@ if [ -z "$SSHGROUPS" ]; then
 
 # Install ansible in here
 if [ $ANSIBLE="yes" ]; then
+  else
 	fi
 # End Ansible install block
 
