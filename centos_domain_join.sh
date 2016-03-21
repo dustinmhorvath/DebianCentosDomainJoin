@@ -216,7 +216,7 @@ service cron restart
 
 # Restart winbind and samba. Fails over to unmasked samba for older (pre-systemd/upstart).
 echo "Restarting samba."
-service winbind restart; oddjobd restart; service messagebus restart
+service winbind restart &>/dev/null; oddjobd restart &>/dev/null ; service messagebus restart &>/dev/null 
 
 echo "Joining domain..."
 if net ads join -U $USERNAME%$PASSWORD; then
@@ -238,6 +238,7 @@ if
 		echo "Sync failed."
 	fi
 
+service winbind restart; oddjobd restart &>/dev/null ; service messagebus restart &>/dev/null 
 
 # Checks to make sure we haven't already added this group to sudoers
 #   to avoid duplicates
@@ -261,7 +262,9 @@ if [ -z "$SSHGROUPS" ]; then
 
 # Install ansible in here
 if [ $ANSIBLE="yes" ]; then
-  else
+		echo
+	else
+		echo
 	fi
 # End Ansible install block
 
