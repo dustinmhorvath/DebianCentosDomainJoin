@@ -225,14 +225,6 @@ ff02::3 ip6-allhosts
 
 EOT
 
-echo "Joining domain..."
-if net ads join -U $USERNAME%$PASSWORD; then
-	echo "Domain join successful."
-	else
-		echo "Failed to join $REALM. Exiting"
-		exit 1
-	fi
-
 # This gets the time from your DC. If you have a different time server, change it here.
 #  (But if the DC can serve the time, then /shrug. Needed for Kerberos auth.
 echo "Syncing NTP..."
@@ -246,6 +238,14 @@ service cron restart
 # Restart winbind and samba. Fails over to unmasked samba for older (pre-systemd/upstart).
 echo "Restarting samba."
 service winbind restart; service nmbd restart; service smbd restart; service samba-ad-dc restart || service winbind restart; service samba restart
+
+echo "Joining domain..."
+if net ads join -U $USERNAME%$PASSWORD; then
+	echo "Domain join successful."
+	else
+		echo "Failed to join $REALM. Exiting"
+		exit 1
+	fi
 
 echo "Refreshing domain users and accounts..."
 if
