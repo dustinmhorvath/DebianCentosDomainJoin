@@ -1,11 +1,11 @@
-# DebianDomainJoin
-#### Script for adding any Debian member machine to an Active Directory domain.
+# DebianCentosDomainJoin
+#### Scripts for adding any Debian or Centos member machines to an Active Directory domain.
 
-- Should work on any Debian-based distribution (including Raspbian).
+- Should work on any Debian-based distribution (including Raspbian) and Centos6+.
 - Installs all of the necessary packages to communicate with Kerberos and Active Directory.
 - Backs up Kerberos, Samba, NSSwitch, and hosts, and creates a valid domain configuration for each.
-- Joins the domain using 'net'.
 - Synchronizes the time with the Domain Controller using ntpd and sets the local timezone.
+- Joins the domain using 'net'.
 - Optionally adds a local/AD group to the sudoers file.
 - Optionally installs Ansible and accompanying useful packages for member machine remote administration.
 
@@ -14,7 +14,7 @@
 1. Set the timezone. Check in /usr/share/zoneinfo/ if you don't know the format.
 2. Set a sudoers group. Or don't, and leave it blank. I'm a readme, not the police.
 3. Mark whether or not you want Ansible installed. It's pretty cool, so I recommend it if you don't have some other management system in place.
-4. Option to restrict which users can SSH into member machines by group.
+4. Option to restrict which users can SSH into member machines by group. This is flaky for AD groups for now, because I haven't found a reliable implementation.
 
 #### Why use this script?
 
