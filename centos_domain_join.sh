@@ -238,6 +238,9 @@ if
 		echo "Sync failed."
 	fi
 
+mkdir /home/$DOMAIN_U
+chmod 777 /home/$DOMAIN_U
+
 service winbind restart; oddjobd restart &>/dev/null ; service messagebus restart &>/dev/null 
 
 # Checks to make sure we haven't already added this group to sudoers
