@@ -122,7 +122,6 @@ echo "Writing new Samba config..."
    idmap config *:backend = rid
    idmap config *:range = 1000-100000
    winbind nested groups = yes
-   winbind allow trusted domains = yes
    winbind trusted domains only = no
    winbind enum users = yes
    winbind enum groups = yes
