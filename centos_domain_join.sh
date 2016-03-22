@@ -52,9 +52,8 @@ ANSIBLE=$(echo ${ANSIBLE,,})
 
 echo "Updating and upgrading..."
 yum upgrade -y &>/dev/null
-
+yum install epel-release
 echo "Installing new packages..."
-# noninteractive suppresses blue screens for kerberos
 yum -y install authconfig krb5-workstation pam_krb5 samba-common oddjob-mkhomedir sudo ntp \
  &>/dev/null || ( echo "Failed to install some packages. Quitting." && exit 1 )
 
@@ -265,9 +264,9 @@ if [ -z "$SSHGROUPS" ]; then
 
 # Install ansible in here
 if [ $ANSIBLE="yes" ]; then
-		echo
+	yum -y install ansible 
 	else
-		echo
+		echo "Skipping ansible install."
 	fi
 # End Ansible install block
 
