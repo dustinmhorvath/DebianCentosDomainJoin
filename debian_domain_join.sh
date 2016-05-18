@@ -50,9 +50,8 @@ TLD_L=$(echo ${TLD_U,,})
 
 ANSIBLE=$(echo ${ANSIBLE,,})
 
-echo "Updating and upgrading..."
+echo "Updating..."
 apt-get update &>/dev/null
-DEBIAN_FRONTEND=noninteractive apt-get upgrade -y &>/dev/null
 
 echo "Installing new packages..."
 # noninteractive suppresses blue screens for kerberos

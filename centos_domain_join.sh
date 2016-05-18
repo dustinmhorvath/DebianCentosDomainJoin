@@ -50,8 +50,6 @@ TLD_L=$(echo ${TLD_U,,})
 
 ANSIBLE=$(echo ${ANSIBLE,,})
 
-echo "Updating and upgrading..."
-yum upgrade -y &>/dev/null
 yum install epel-release
 echo "Installing new packages..."
 yum -y install authconfig krb5-workstation pam_krb5 samba-common oddjob-mkhomedir sudo ntp \
